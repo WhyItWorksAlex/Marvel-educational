@@ -3,6 +3,7 @@ import { Component } from 'react';
 import MarvelService from '../../services/MarvelService';
 import Spinner from "../spinner/Spinner"
 import ErrorMessage from '../errorMessage/ErrorMessage';
+import PropTypes from 'prop-types';
 
 
 class CharList extends Component {
@@ -85,19 +86,35 @@ class CharList extends Component {
     }
 
     componentDidMount() {
-        window.addEventListener('scroll', this.throttle(this.onLoadByScroll, 1000))
+        window.addEventListener('scroll', this.throttle(this.onLoadByScroll, 300))
         this.updateChars()
     }
 
     componentWillUnmount() {
-        window.removeEventListener('scroll', this.throttle(this.onLoadByScroll, 1000))
+        window.removeEventListener('scroll', this.throttle(this.onLoadByScroll, 300))
     }
+
+    itemRefs = [];
+
+    setRef = (ref) => {
+        this.itemRefs.push(ref);
+    };
+
+    focusOnItem = (index) => {
+        this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
+        this.itemRefs[index].classList.add('char__item_selected');
+        this.itemRefs[index].focus();
+    }
+
+
+
 
     render() {
         const {charList, loading, error, newItemLoading, offset, charEnded} = this.state
+
         const errorMessage = error ? <ErrorMessage /> : null;
         const spinner = loading ? <Spinner /> : null;
-        const content = !(loading || error) ? <CharListComp charList={charList} onCharSelected={this.props.onCharSelected} /> : null;
+        const content = !(loading || error) ? <View charList={charList} props={this.props} /> : null;
 
 
         return (
@@ -122,20 +139,31 @@ class CharList extends Component {
 
 }
 
-const CharListComp = ({charList, onCharSelected}) => {
-    return (
-        <>
-            {charList.map(char => (
-                <li 
-                    key={char.id} 
-                    className="char__item"                    
-                    onClick={() => onCharSelected(char.id)}>
-                        <img src={char.thumbnail} alt={char.name} style={char.styleImage}/>
-                        <div className="char__name">{char.name}</div>
-                </li>
-            ))}  
-        </>
-    )
+const View = ({charList, props}) => {
+    console.log(props)
+    return charList.map(({name, thumbnail, id, styleImage}) => {
+        const active = props.charId === id;
+        const clazz = active ? 'char__item char__item_selected' : 'char__item';
+        return (               
+            <li 
+                tabIndex={0}
+                key={id} 
+                className={clazz}                    
+                onClick={() => {
+                    props.onCharSelected(id)
+                }}>
+                    <img src={thumbnail} alt={name} style={styleImage}/>
+                    <div className="char__name">{name}</div>
+            </li>
+
+        )
+    })
+}
+
+
+
+CharList.propTypes = {
+    onCharSelected: PropTypes.func.isRequired,
 }
 
 export default CharList;
