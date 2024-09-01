@@ -60,9 +60,10 @@ class CharList extends Component {
     }
 
     onLoadByScroll = () => {
-        console.log((window.scrollY + document.documentElement.clientHeight) >= document.documentElement.scrollHeight)
-        if ((window.scrollY + document.documentElement.clientHeight) >= document.documentElement.scrollHeight) {
-            this.onRequest(this.state.offset);
+        if (this.state.offset !== 210) {
+            if ((window.scrollY + document.documentElement.clientHeight) >= document.documentElement.scrollHeight) {
+                this.onRequest(this.state.offset);
+            }
         }
     }
 
@@ -84,8 +85,8 @@ class CharList extends Component {
     }
 
     componentDidMount() {
-        this.updateChars()
         window.addEventListener('scroll', this.throttle(this.onLoadByScroll, 1000))
+        this.updateChars()
     }
 
     componentWillUnmount() {
