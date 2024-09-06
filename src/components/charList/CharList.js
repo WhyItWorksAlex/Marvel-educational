@@ -1,6 +1,6 @@
 import './charList.scss';
 import { useState, useEffect, useRef } from 'react';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 import Spinner from "../spinner/Spinner"
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import PropTypes from 'prop-types';
@@ -9,19 +9,13 @@ import PropTypes from 'prop-types';
 const CharList = (props) => {
 
     const [charList, setCharList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
-    const marvelService = new MarvelService();
+    const {loading, error, getAllCharacters} = useMarvelService();
 
-    const onError = () => {
-        setLoading(false);
-        setError(true);
-        setNewItemLoading(false);
-    }
+    const offsetRef = useRef(offset);
 
     const onCharsLoaded = (charArr) => {
         let ended = false;
@@ -29,28 +23,24 @@ const CharList = (props) => {
             ended = true;
         }
         setCharList(prev => [...prev, ...charArr])
-        setLoading(false);
-        setError(false);
         setNewItemLoading(false);
-        setOffset(prev => prev + 9)
+        setOffset(prev => {
+            offsetRef.current = prev + 9;
+            return prev + 9
+        })
         setCharEnded(ended)
     }
 
-    const onCharListLoading = () => {
-        setNewItemLoading(true);
-    }
-
-    const onRequest = (offset) => {
-        onCharListLoading()
-        marvelService.getAllCharacters(offset)
+    const onRequest = (offset, initial) => {
+        initial ? setNewItemLoading(false) : setNewItemLoading(true)
+        getAllCharacters(offset)
             .then(onCharsLoaded)
-            .catch(onError)
     }
 
     const onLoadByScroll = () => {
-        if (offset !== 210) {
+        if (offsetRef.current !== 210) {
             if ((window.scrollY + document.documentElement.clientHeight) >= document.documentElement.scrollHeight) {
-                onRequest(offset);
+                onRequest(offsetRef.current, false);
             }
         }
     }
@@ -74,7 +64,7 @@ const CharList = (props) => {
 
     useEffect(() => {
         window.addEventListener('scroll', throttle(onLoadByScroll, 300));
-        onRequest();
+        onRequest(offset, true);
 
         return (() => {
             window.removeEventListener('scroll', throttle(onLoadByScroll, 300))
@@ -82,8 +72,7 @@ const CharList = (props) => {
     }, [])
 
     const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error) ? <View charList={charList} props={props} /> : null;
+    const spinner = loading && !newItemLoading ? <Spinner /> : null;
 
 
     return (
@@ -91,17 +80,19 @@ const CharList = (props) => {
             {errorMessage}
             {spinner}
             <ul className="char__grid">
-                {content}
+                <View charList={charList} props={props} />
             </ul>
-            <button 
-                className="button button__main button__long"
-                disabled={newItemLoading}
-                onClick={() => 
-                    onRequest(offset)
-                }
-                style={{display: charEnded ? 'none' : 'block'}}>
-                <div className="inner">load more</div>
-            </button>
+            {loading && !newItemLoading ? null : 
+                <button 
+                    className="button button__main button__long"
+                    disabled={newItemLoading}
+                    onClick={() => 
+                        onRequest(offset, false)
+                    }
+                    style={{display: charEnded ? 'none' : 'block'}}>
+                    <div className="inner">load more</div>
+                </button>
+            }
         </div>
     )
 
