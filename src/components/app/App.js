@@ -1,9 +1,8 @@
 import AppHeader from "../appHeader/AppHeader";
 
-import { BrowserRouter, Routes, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import MainPage from '../pages/main-page/main-page'
-import ComicsPage from "../pages/comics-page/comics-page";
+import {MainPage, ComicsPage, Page404, SingleComicPage} from '../pages' // index можно не указывать, он по умолчанию его ищет
 
 const App = () => {
     
@@ -13,8 +12,12 @@ const App = () => {
                 <AppHeader/>
                 <main>
                     <Routes>
-                        <Route exact path='/' element={<MainPage />}></Route>
-                        <Route exact path='/comics' element={<ComicsPage />}></Route>
+                        <Route path='/' element={<MainPage />}></Route>
+                        <Route path="/comics" >   
+                            <Route index element={<ComicsPage/>}/>                             
+                            <Route path=":comicId" element={<SingleComicPage/>}/>
+                        </Route>
+                        <Route path='*' element={<Page404 />}></Route>
                     </Routes>
                 </main>
             </div>

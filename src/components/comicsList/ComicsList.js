@@ -4,13 +4,16 @@ import { useState, useEffect } from 'react';
 import useMarvelService from '../../services/MarvelService';
 import Spinner from "../spinner/Spinner"
 import ErrorMessage from '../errorMessage/ErrorMessage';
+import { Link } from 'react-router-dom';
 
 const ComicsList = (props) => {
+    const storageOffset = Number(sessionStorage.getItem('storageOffset'));
+    const storageComicsList = JSON.parse(sessionStorage.getItem('storageComicsList'));
 
-    const [comicsList, setComicsList] = useState([]);
+    const [comicsList, setComicsList] = useState(!storageComicsList ? [] : storageComicsList);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [charEnded, setCharEnded] = useState(false);
-    const [offset, setOffset] = useState(0);
+    const [offset, setOffset] = useState(!storageOffset ? 0 : storageOffset);
 
     const {loading, error, getAllComics} = useMarvelService();
 
@@ -19,20 +22,38 @@ const ComicsList = (props) => {
         if (comicsArr.length < 8) {
             ended = true;
         }
-        setComicsList(prev => [...prev, ...comicsArr])
-        setOffset(prev => prev + 8)
+        setComicsList(prev => {
+            sessionStorage.setItem('storageComicsList', JSON.stringify([...prev, ...comicsArr]));
+            return [...prev, ...comicsArr]
+        });
+        setOffset(prev => {
+            sessionStorage.setItem('storageOffset', prev + 8);
+            return prev + 8
+        })
         setNewItemLoading(false);
         setCharEnded(ended)
     }
 
+
     const onRequest = (offset, initial) => {
-        initial ? setNewItemLoading(false) : setNewItemLoading(true)
+        if (initial && comicsList.length > 0) {
+            setNewItemLoading(true)
+            console.log('улосвие 1')
+        } else if (initial && comicsList.length === 0) {
+            setNewItemLoading(false)
+            console.log('улосвие 2')
+        } else {
+            setNewItemLoading(true) 
+            console.log('улосвие 3')
+        }
         getAllComics(offset)
-            .then(onCharsLoaded)
+            .then(onCharsLoaded)      
     }
 
     useEffect(() => {
-        onRequest(offset, true);
+        if(comicsList.length === 0) {
+            onRequest(offset, true);
+        }
     }, [])
 
     const errorMessage = error ? <ErrorMessage /> : null;
@@ -63,13 +84,13 @@ const ComicsList = (props) => {
 }
 
 const View = ({comicsList}) => {
-    return comicsList.map((comics, index) => (
-        <li className="comics__item" key={index}>
-            <a href="#">
+    return comicsList.map((comics) => (
+        <li className="comics__item" key={comics.id}>
+            <Link to={`/comics/${comics.id}`}>
                 <img src={comics.thumbnail} alt={comics.title} style={comics.styleImage} className="comics__item-img"/>
                 <div className="comics__item-name">{comics.title}</div>
                 <div className="comics__item-price">{comics.price}</div>
-            </a>
+            </Link>
         </li>
     ))
 }

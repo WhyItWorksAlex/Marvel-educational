@@ -9,7 +9,8 @@
 В компоненте CharInfo реализован поход с помощью пакета prop-types для определения типов пропсов.
 <a href="https://ru.legacy.reactjs.org/docs/typechecking-with-proptypes.html">Ссылка на документацию</a>
 
-Применен компонент ErrorBoundary для ловли ошибок
+Применен компонент ErrorBoundary для ловли ошибок.
+В Компоненте ComicsList применен метод хранения сессии в LocalStorage
 
 Применен классовый подход к созданию React приложения, хэши до 03.09.2024
 
