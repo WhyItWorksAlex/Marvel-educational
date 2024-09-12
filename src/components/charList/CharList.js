@@ -4,6 +4,7 @@ import useMarvelService from '../../services/MarvelService';
 import Spinner from "../spinner/Spinner"
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import PropTypes from 'prop-types';
+import setContent from '../../utils/setContent';
 
 
 const CharList = (props) => {
@@ -13,7 +14,7 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
-    const {loading, error, getAllCharacters} = useMarvelService();
+    const {loading, error, getAllCharacters, process, setProcess} = useMarvelService();
 
     const offsetRef = useRef(offset);
 
@@ -35,6 +36,7 @@ const CharList = (props) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true)
         getAllCharacters(offset)
             .then(onCharsLoaded)
+            .then(() => setProcess('confirmed'))
     }
 
     const onLoadByScroll = () => {
