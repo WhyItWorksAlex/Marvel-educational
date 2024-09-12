@@ -54,6 +54,7 @@ const ComicsList = (props) => {
         if(comicsList.length === 0) {
             onRequest(offset, true);
         }
+        // eslint-disable-next-line
     }, [])
 
     const errorMessage = error ? <ErrorMessage /> : null;

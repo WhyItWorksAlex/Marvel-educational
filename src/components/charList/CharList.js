@@ -69,6 +69,7 @@ const CharList = (props) => {
         return (() => {
             window.removeEventListener('scroll', throttle(onLoadByScroll, 300))
         })
+        // eslint-disable-next-line
     }, [])
 
     const errorMessage = error ? <ErrorMessage /> : null;

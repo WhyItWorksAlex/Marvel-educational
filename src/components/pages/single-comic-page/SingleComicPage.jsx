@@ -16,6 +16,7 @@ const SingleComicOrCharPage = ({dataType}) => {
 
     useEffect(() => {
         update()
+        // eslint-disable-next-line
     }, [id])
 
     const onLoaded = (value) => {
