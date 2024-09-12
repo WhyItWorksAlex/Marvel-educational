@@ -4,8 +4,6 @@ import useMarvelService from '../../services/MarvelService';
 import Spinner from "../spinner/Spinner"
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import PropTypes from 'prop-types';
-import setContent from '../../utils/setContent';
-
 
 const CharList = (props) => {
 
@@ -14,7 +12,7 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(210);
     const [charEnded, setCharEnded] = useState(false);
 
-    const {loading, error, getAllCharacters, process, setProcess} = useMarvelService();
+    const {loading, error, getAllCharacters} = useMarvelService();
 
     const offsetRef = useRef(offset);
 
@@ -36,7 +34,6 @@ const CharList = (props) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true)
         getAllCharacters(offset)
             .then(onCharsLoaded)
-            .then(() => setProcess('confirmed'))
     }
 
     const onLoadByScroll = () => {
@@ -71,6 +68,7 @@ const CharList = (props) => {
         return (() => {
             window.removeEventListener('scroll', throttle(onLoadByScroll, 300))
         })
+        // eslint-disable-next-line
     }, [])
 
     const errorMessage = error ? <ErrorMessage /> : null;
@@ -81,9 +79,7 @@ const CharList = (props) => {
         <div className="char__list">
             {errorMessage}
             {spinner}
-            <ul className="char__grid">
-                <View charList={charList} props={props} />
-            </ul>
+            <View charList={charList} props={props} />
             {loading && !newItemLoading ? null : 
                 <button 
                     className="button button__main button__long"
@@ -101,23 +97,26 @@ const CharList = (props) => {
 }
 
 const View = ({charList, props}) => {
-    return charList.map(({name, thumbnail, id, styleImage}) => {
-        const active = props.charId === id;
-        const clazz = active ? 'char__item char__item_selected' : 'char__item';
-        return (               
-            <li 
-                tabIndex={0}
-                key={id} 
-                className={clazz}                    
-                onClick={() => {
-                    props.onCharSelected(id)
-                }}>
-                    <img src={thumbnail} alt={name} style={styleImage}/>
-                    <div className="char__name">{name}</div>
-            </li>
-
-        )
-    })
+    return (
+        <ul className="char__grid">
+            {charList.map(({name, thumbnail, id, styleImage}) => {
+                const active = props.charId === id;
+                const clazz = active ? 'char__item char__item_selected' : 'char__item';
+                return (               
+                    <li 
+                        tabIndex={0}
+                        key={id} 
+                        className={clazz}                    
+                        onClick={() => {
+                            props.onCharSelected(id)
+                        }}>
+                            <img src={thumbnail} alt={name} style={styleImage}/>
+                            <div className="char__name">{name}</div>
+                    </li>
+                )
+            })}
+        </ul>
+    )
 }
 
 

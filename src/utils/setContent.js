@@ -2,12 +2,12 @@ import Spinner from '../components/spinner/Spinner';
 import ErrorMessage from '../components/errorMessage/ErrorMessage';
 import Skeleton from "../components/skeleton/Skeleton"
 
-const setContent = (process, Component, data, noSpinner) => {
+const setContent = (process, Component, data) => {
   switch(process) {
       case 'waiting': 
           return <Skeleton />;
       case 'loading':
-          return noSpinner ? <Component data={data} /> : <Spinner />;
+          return <Spinner />;
       case 'confirmed':
           return <Component data={data} />;
       case 'error':
